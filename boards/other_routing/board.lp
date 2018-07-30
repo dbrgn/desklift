@@ -1,7 +1,7 @@
 (librepcb_board 146e283d-8dba-42bd-9080-c603e88aa634
  (name "other_routing")
  (default_font "newstroke.bene")
- (grid (type dots) (interval 0.317504) (unit millimeters))
+ (grid (type dots) (interval 0.158752) (unit millimeters))
  (layers (inner 0))
  (design_rules
   (name "LibrePCB Default Design Rules")
