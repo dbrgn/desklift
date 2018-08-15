@@ -7,6 +7,7 @@ extern crate panic_semihosting;
 extern crate stm32f103xx;
 extern crate stm32f103xx_hal as hal;
 
+use hal::delay::Delay;
 use hal::prelude::*;
 use rt::ExceptionFrame;
 
@@ -14,26 +15,31 @@ use rt::ExceptionFrame;
 entry!(main);
 
 fn main() -> ! {
-    let p = stm32f103xx::Peripherals::take().unwrap();
+    let dp = stm32f103xx::Peripherals::take().unwrap();
+    let cp = cortex_m::Peripherals::take().unwrap();
 
     // Get reference to GPIO peripherals
-    let mut rcc = p.RCC.constrain();
-    let mut gpiob = p.GPIOB.split(&mut rcc.apb2);
-    let mut gpioc = p.GPIOC.split(&mut rcc.apb2);
+    let mut rcc = dp.RCC.constrain();
+    let mut gpiob = dp.GPIOB.split(&mut rcc.apb2);
+    let mut gpioc = dp.GPIOC.split(&mut rcc.apb2);
 
-    // Output pins
-    let pin_up = gpiob.pb4;
-    let pin_down = gpiob.pb5;
-    let pin_led = gpioc.pc13;
+    // Set up timer
+    let mut flash = dp.FLASH.constrain();
+    let clocks = rcc.cfgr.freeze(&mut flash.acr);
+    let mut delay = Delay::new(cp.SYST, clocks);
 
     // Set up output pins
-    pin_up.into_push_pull_output(&mut gpiob.crl);
-    pin_down.into_push_pull_output(&mut gpiob.crl);
+    let _pin_up = gpiob.pb4.into_push_pull_output(&mut gpiob.crl);
+    let _pin_down = gpiob.pb5.into_push_pull_output(&mut gpiob.crl);
+    let mut pin_led = gpioc.pc13.into_push_pull_output(&mut gpioc.crh);
 
-    // Turn on LED
-    pin_led.into_push_pull_output(&mut gpioc.crh);
-
-    loop { }
+    // Main loop
+    loop {
+        pin_led.set_high();
+        delay.delay_ms(1_000_u16);
+        pin_led.set_low();
+        delay.delay_ms(1_000_u16);
+    }
 }
 
 // Define the hard fault handler
