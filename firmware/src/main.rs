@@ -3,15 +3,19 @@
 
 extern crate cortex_m;
 #[macro_use(entry, exception)] extern crate cortex_m_rt as rt;
+extern crate cortex_m_semihosting as sh;
 #[macro_use(block)] extern crate nb;
 extern crate panic_semihosting;
 extern crate stm32f103xx;
 extern crate stm32f103xx_hal as hal;
 
+use core::fmt::Write;
+
 use hal::delay::Delay;
 use hal::prelude::*;
 use hal::serial::Serial;
 use rt::ExceptionFrame;
+use sh::hio;
 
 // Entry point
 entry!(main);
@@ -22,6 +26,10 @@ fn main() -> ! {
 
     let mut rcc = dp.RCC.constrain();
     let mut afio = dp.AFIO.constrain(&mut rcc.apb2);
+
+    // Set up logging through semihosting
+    let mut hstdout = hio::hstdout().unwrap();
+    writeln!(hstdout, "Initializing desklift...").unwrap();
 
     // Get reference to GPIO peripherals
     let mut gpiob = dp.GPIOB.split(&mut rcc.apb2);
