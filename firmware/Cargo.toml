@@ -1,0 +1,34 @@
+[package]
+authors = ["Danilo Bargen <mail@dbrgn.ch>"]
+categories = ["embedded", "no-std"]
+description = "Desk lift controller"
+keywords = ["arm", "cortex-m"]
+license = "MIT OR Apache-2.0"
+name = "desklift"
+repository = "https://github.com/dbrgn/desklift"
+version = "0.1.0"
+
+[dependencies]
+cortex-m = "0.5"
+cortex-m-rt = "0.5"
+cortex-m-semihosting = "0.3"
+panic-semihosting = "0.3"
+
+# Uncomment for the panic example.
+# panic-itm = "0.1.1"
+
+# Uncomment for the allocator example.
+# alloc-cortex-m = "0.3.4"
+
+[dependencies.stm32f103xx]
+features = ["rt"]
+version = "0.10.0"
+
+[dependencies.stm32f103xx-hal]
+git = "https://github.com/japaric/stm32f103xx-hal"
+features = ["rt"]
+
+[profile.release]
+codegen-units = 1 # better optimizations
+debug = true
+lto = true # better optimizations
