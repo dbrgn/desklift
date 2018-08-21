@@ -33,7 +33,7 @@ impl RingBuf {
         }
     }
 
-    pub fn add(&mut self, byte: u8) -> Result<(), RingBufError> {
+    pub fn push(&mut self, byte: u8) -> Result<(), RingBufError> {
         // Ensure the buffer is not already full
         if self.full() {
             return Err(RingBufError::Full);
@@ -78,7 +78,7 @@ mod tests {
     fn empty() {
         let mut buf = RingBuf::new();
         assert!(buf.empty());
-        buf.add(1).unwrap();
+        buf.push(1).unwrap();
         assert!(!buf.empty());
         buf.read();
         assert!(buf.empty());
@@ -91,12 +91,12 @@ mod tests {
 
         // Add 63 entries
         for i in 1..=63 {
-            buf.add(i).unwrap();
+            buf.push(i).unwrap();
         }
         assert!(!buf.full());
 
         // Add the 64th entry
-        buf.add(64).unwrap();
+        buf.push(64).unwrap();
         assert!(buf.full());
     }
 
@@ -108,14 +108,14 @@ mod tests {
         assert_eq!(buf.read(), None);
 
         // Insert two values
-        buf.add(1).unwrap();
-        buf.add(2).unwrap();
+        buf.push(1).unwrap();
+        buf.push(2).unwrap();
 
         // Read first value
         assert_eq!(buf.read(), Some(1));
 
         // Add some more
-        buf.add(3).unwrap();
+        buf.push(3).unwrap();
 
         // Read more values
         assert_eq!(buf.read(), Some(2));
@@ -129,15 +129,15 @@ mod tests {
 
         // Add 64 entries
         for i in 1..=64 {
-            assert_eq!(buf.add(i), Ok(()));
+            assert_eq!(buf.push(i), Ok(()));
         }
 
         // Adding the 65th entry will fail
-        assert_eq!(buf.add(65), Err(RingBufError::Full));
+        assert_eq!(buf.push(65), Err(RingBufError::Full));
 
         // But when reading 1 item, another slot will be freed
         assert_eq!(buf.read(), Some(1));
-        assert_eq!(buf.add(65), Ok(()));
-        assert_eq!(buf.add(66), Err(RingBufError::Full));
+        assert_eq!(buf.push(65), Ok(()));
+        assert_eq!(buf.push(66), Err(RingBufError::Full));
     }
 }
