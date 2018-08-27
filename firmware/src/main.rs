@@ -1,34 +1,94 @@
+//! Desk lift firmware
+//!
+//! Serial protocol:
+//!
+//! - Baudrate 9600
+//! - Every command is a single signed byte
+//! - Positive values move up, negative values move down
+//! - The value must be multiplied by 0.1s to get the move duration
+
 #![no_main]
 #![no_std]
 
-extern crate cortex_m;
+#[macro_use(singleton)] extern crate cortex_m;
 #[macro_use(entry, exception)] extern crate cortex_m_rt as rt;
 extern crate cortex_m_semihosting as sh;
 #[macro_use(block)] extern crate nb;
 extern crate panic_semihosting;
-extern crate stm32f103xx;
+extern crate ringthing;
+#[macro_use(interrupt)] extern crate stm32f103xx;
 extern crate stm32f103xx_hal as hal;
 
 use core::fmt::Write;
 
 use hal::delay::Delay;
 use hal::prelude::*;
-use hal::serial::Serial;
+use hal::serial::{Serial, Event as SerialEvent};
 use rt::ExceptionFrame;
 use sh::hio;
+use stm32f103xx::Interrupt;
+
+#[derive(PartialEq, Debug)]
+enum Direction {
+    Up,
+    Down,
+}
+
+#[derive(Debug)]
+struct Command(i8);
+
+impl Command {
+    fn from_u8(byte: u8) -> Self {
+        Command(byte as i8)
+    }
+
+    fn get_ms(&self) -> u16 {
+        (self.0 as u16) * 10
+    }
+
+    fn get_direction(&self) -> Direction {
+        if self.0 < 0 {
+            Direction::Down
+        } else {
+            Direction::Up
+        }
+    }
+}
+
+//struct CommandReader {
+//    rx: serial::Rx<stm32f103xx::USART1>,
+//    dma_chan: hal::dma::dma1::C5,
+//    buf: &'static [u8; 8],
+//}
+//
+//impl CommandReader {
+//    fn new(rx: serial::Rx<stm32f103xx::USART1>, dma_chan: hal::dma::dma1::C5) -> Self {
+//        CommandReader {
+//            rx,
+//            dma_chan,
+//            buf: singleton!(: [u8; 8] = [0; 8]).unwrap(),
+//        }
+//    }
+//
+//    fn await(&mut self) -> Result<Command, serial::Error> {
+//        self.rx.read_exact(self.dma_chan, &mut self.buf).wait();
+//        Ok(Command::from_u8(self.buf[0]))
+//    }
+//}
 
 // Entry point
 entry!(main);
-
 fn main() -> ! {
     let dp = stm32f103xx::Peripherals::take().unwrap();
     let cp = cortex_m::Peripherals::take().unwrap();
 
     let mut rcc = dp.RCC.constrain();
     let mut afio = dp.AFIO.constrain(&mut rcc.apb2);
+    let mut nvic = cp.NVIC;
 
     // Set up logging through semihosting
     let mut hstdout = hio::hstdout().unwrap();
+    let mut hstderr = hio::hstderr().unwrap();
     writeln!(hstdout, "Initializing desklift...").unwrap();
 
     // Get reference to GPIO peripherals
@@ -45,10 +105,13 @@ fn main() -> ! {
     let _pin_down = gpiob.pb5.into_push_pull_output(&mut gpiob.crl);
     let mut pin_led = gpioc.pc13.into_push_pull_output(&mut gpioc.crh);
 
+    // Set up DMA
+    let channels = dp.DMA1.split(&mut rcc.ahb);
+
     // Set up serial communication
     let tx_pin = gpiob.pb6.into_alternate_push_pull(&mut gpiob.crl);
     let rx_pin = gpiob.pb7;
-    let serial = Serial::usart1(
+    let mut serial = Serial::usart1(
         dp.USART1,
         (tx_pin, rx_pin),
         &mut afio.mapr,
@@ -56,7 +119,19 @@ fn main() -> ! {
         clocks,
         &mut rcc.apb2,
     );
-    let (mut tx, _rx) = serial.split();
+    serial.listen(SerialEvent::Rxne);
+    let (mut tx, mut rx) = serial.split();
+
+    // Enable USART interrupts
+    nvic.enable(Interrupt::USART1);
+
+    //let mut cmd_reader = CommandReader::new(rx, channels.5);
+    let buf = singleton!(: [u8; 1] = [0; 1]).unwrap();
+    let mut chan = channels.5;
+
+    writeln!(hstdout, "Reading byte...").unwrap();
+    let (buf_, _chan, _rx) = rx.read_exact(chan, buf).wait();
+    writeln!(hstdout, "Buf: {:?}", &buf_);
 
     // Main loop
     loop {
@@ -71,7 +146,22 @@ fn main() -> ! {
         block!(tx.write(b'\n')).ok();
         pin_led.set_low();
         delay.delay_ms(1_000_u16);
+
+        //match cmd_reader.await() {
+        //    Ok(cmd) => {
+        //        writeln!(hstdout, "Read byte: {:?}ms {:?}", cmd.get_ms(), cmd.get_direction());
+        //    },
+        //    Err(e) => {
+        //        writeln!(hstderr, "Could not read byte: {:?}", e);
+        //    },
+        //};
     }
+}
+
+// Serial RX interrupt
+interrupt!(USART1, usart1_rx);
+fn usart1_rx() {
+    panic!("USART1 RX");
 }
 
 // Define the hard fault handler

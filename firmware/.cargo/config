@@ -1,6 +1,3 @@
-[build]
-target = "thumbv7em-none-eabihf"
-
 [target.thumbv6m-none-eabi]
 runner = 'arm-none-eabi-gdb'
 rustflags = [

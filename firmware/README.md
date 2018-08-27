@@ -17,7 +17,7 @@ Start OpenOCD:
 
 Build and run binary:
 
-    cargo run --release
+    cargo run --release --target thumbv7em-none-eabihf
 
 # License
 
