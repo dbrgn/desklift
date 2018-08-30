@@ -9,7 +9,7 @@ Use nightly Rust:
 
 Add rust-std component:
 
-    rustup target add thumbv7m-none-eabi
+    rustup target add thumbv7em-none-eabihf
 
 Start OpenOCD:
 
