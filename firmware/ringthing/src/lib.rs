@@ -5,6 +5,8 @@
 //!
 //! Some inspiration: https://embedjournal.com/implementing-circular-buffer-embedded-c/
 
+#![no_std]
+
 mod index;
 mod ringbuf;
 
