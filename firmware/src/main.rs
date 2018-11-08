@@ -10,23 +10,25 @@
 #![no_main]
 #![no_std]
 
-#[macro_use(singleton)] extern crate cortex_m;
-#[macro_use(entry, exception)] extern crate cortex_m_rt as rt;
+extern crate cortex_m;
+extern crate cortex_m_rt as rt;
 extern crate cortex_m_semihosting as sh;
-#[macro_use(block)] extern crate nb;
+extern crate nb;
 extern crate panic_semihosting;
 extern crate ringthing;
-#[macro_use(interrupt)] extern crate stm32f103xx;
+extern crate stm32f103xx;
 extern crate stm32f103xx_hal as hal;
 
 use core::fmt::Write;
 
+use cortex_m::singleton;
 use hal::delay::Delay;
 use hal::prelude::*;
 use hal::serial::{Serial, Event as SerialEvent};
-use rt::ExceptionFrame;
+use nb::block;
+use rt::{ExceptionFrame, entry, exception};
 use sh::hio;
-use stm32f103xx::Interrupt;
+use stm32f103xx::{Interrupt, interrupt};
 
 #[derive(PartialEq, Debug)]
 enum Direction {
@@ -77,7 +79,7 @@ impl Command {
 //}
 
 // Entry point
-entry!(main);
+#[entry]
 fn main() -> ! {
     let dp = stm32f103xx::Peripherals::take().unwrap();
     let cp = cortex_m::Peripherals::take().unwrap();
@@ -165,13 +167,13 @@ fn usart1_rx() {
 }
 
 // Define the hard fault handler
-exception!(HardFault, hard_fault);
-fn hard_fault(ef: &ExceptionFrame) -> ! {
+#[exception]
+fn HardFault(ef: &ExceptionFrame) -> ! {
     panic!("HardFault at {:#?}", ef);
 }
 
 // Define the default exception handler
-exception!(*, default_handler);
-fn default_handler(irqn: i16) {
+#[exception]
+fn DefaultHandler(irqn: i16) {
     panic!("Unhandled exception (IRQn = {})", irqn);
 }
