@@ -8,7 +8,7 @@ pub struct Index {
 impl Index {
     /// Create a new `Index` instance. The value will wrap at the limit
     /// (meaning that it will always be smaller than the limit).
-    pub fn new(limit: usize) -> Self {
+    pub const fn new(limit: usize) -> Self {
         Index {
             limit,
             val: 0,

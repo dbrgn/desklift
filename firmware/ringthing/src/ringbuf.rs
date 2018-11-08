@@ -4,7 +4,7 @@ use crate::index::Index;
 const SIZE: usize = 64 + 1;
 
 
-/// A lock-free ring buffer / circular buffer.
+/// A lock-free ring buffer / circular buffer with room for 64 bytes.
 ///
 /// To differentiate between a full and an empty buffer, only SIZE-1 elements
 /// can be stored in the buffer.
@@ -25,7 +25,7 @@ pub enum RingBufError {
 }
 
 impl RingBuf {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         RingBuf {
             buf: [0; SIZE],
             read_index: Index::new(SIZE),
