@@ -6,11 +6,13 @@
 extern crate panic_semihosting;
 
 use cortex_m_semihosting::{debug, hprintln};
+use ringthing::RingBuf;
 use rtfm::app;
 use stm32f103xx::Interrupt;
 
 #[app(device = stm32f103xx)]
 const APP: () = {
+    static mut SERIAL_BUF: RingBuf = RingBuf::new();
 
     /// Initialiation happens here.
     ///
@@ -44,9 +46,10 @@ const APP: () = {
         loop {}
     }
 
-    #[interrupt]
+    #[interrupt(resources = [SERIAL_BUF])]
     fn USART1() {
         hprintln!("USART1 interrupt called").unwrap();
+        resources.SERIAL_BUF.push(42).unwrap();
     }
 
 };
