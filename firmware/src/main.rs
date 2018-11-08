@@ -5,10 +5,9 @@
 
 extern crate panic_semihosting;
 
-use cortex_m_semihosting::{debug, hprintln};
+use cortex_m_semihosting::hprintln;
 use ringthing::RingBuf;
 use rtfm::app;
-use stm32f103xx::Interrupt;
 
 #[app(device = stm32f103xx)]
 const APP: () = {
@@ -28,10 +27,7 @@ const APP: () = {
         // Device specific peripherals
         let _device: stm32f103xx::Peripherals = device;
 
-        //rtfm::pend(Interrupt::USART1);
-
         hprintln!("init").unwrap();
-        debug::exit(debug::EXIT_SUCCESS);
     }
 
     /// The runtime will execute the idle task after init. Unlike init, idle
@@ -46,10 +42,28 @@ const APP: () = {
         loop {}
     }
 
-    #[interrupt(resources = [SERIAL_BUF])]
+    #[interrupt(resources = [SERIAL_BUF], spawn = [move_table])]
     fn USART1() {
         hprintln!("USART1 interrupt called").unwrap();
-        resources.SERIAL_BUF.push(42).unwrap();
+
+        let byte_read = 42u8; // TODO
+
+        resources.SERIAL_BUF.push(byte_read).unwrap();
+
+        spawn.move_table(byte_read).unwrap();
+    }
+
+    #[task]
+    fn move_table(command: u8) {
+        hprintln!("move: {}", command).unwrap();
+    }
+
+    // RTFM requires that free interrupts are declared in an extern block when
+    // using software tasks; these free interrupts will be used to dispatch the
+    // software tasks.
+    extern "C" {
+        fn SPI1();
+        fn SPI2();
     }
 
 };
