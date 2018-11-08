@@ -7,6 +7,7 @@ license = "MIT OR Apache-2.0"
 name = "desklift"
 repository = "https://github.com/dbrgn/desklift"
 version = "0.1.0"
+edition = "2018"
 
 [dependencies]
 cortex-m = "0.5"

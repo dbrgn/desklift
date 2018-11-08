@@ -10,25 +10,22 @@
 #![no_main]
 #![no_std]
 
-extern crate cortex_m;
-extern crate cortex_m_rt as rt;
-extern crate cortex_m_semihosting as sh;
-extern crate nb;
 extern crate panic_semihosting;
-extern crate ringthing;
-extern crate stm32f103xx;
-extern crate stm32f103xx_hal as hal;
 
 use core::fmt::Write;
 
 use cortex_m::singleton;
-use hal::delay::Delay;
-use hal::prelude::*;
-use hal::serial::{Serial, Event as SerialEvent};
+use cortex_m_rt as rt;
+use cortex_m_semihosting as sh;
 use nb::block;
-use rt::{ExceptionFrame, entry, exception};
-use sh::hio;
 use stm32f103xx::{Interrupt, interrupt};
+use stm32f103xx_hal as hal;
+
+use crate::hal::delay::Delay;
+use crate::hal::prelude::*;
+use crate::hal::serial::{Serial, Event as SerialEvent};
+use crate::rt::{ExceptionFrame, entry, exception};
+use crate::sh::hio;
 
 #[derive(PartialEq, Debug)]
 enum Direction {
@@ -90,7 +87,7 @@ fn main() -> ! {
 
     // Set up logging through semihosting
     let mut hstdout = hio::hstdout().unwrap();
-    let mut hstderr = hio::hstderr().unwrap();
+    let _hstderr = hio::hstderr().unwrap();
     writeln!(hstdout, "Initializing desklift...").unwrap();
 
     // Get reference to GPIO peripherals
@@ -122,14 +119,14 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
     serial.listen(SerialEvent::Rxne);
-    let (mut tx, mut rx) = serial.split();
+    let (mut tx, rx) = serial.split();
 
     // Enable USART interrupts
     nvic.enable(Interrupt::USART1);
 
     //let mut cmd_reader = CommandReader::new(rx, channels.5);
     let buf = singleton!(: [u8; 1] = [0; 1]).unwrap();
-    let mut chan = channels.5;
+    let chan = channels.5;
 
     writeln!(hstdout, "Reading byte...").unwrap();
     let (buf_, _chan, _rx) = rx.read_exact(chan, buf).wait();
