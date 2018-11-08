@@ -6,13 +6,10 @@
 extern crate panic_semihosting;
 
 use cortex_m_semihosting::hprintln;
-use ringthing::RingBuf;
 use rtfm::app;
 
 #[app(device = stm32f103xx)]
 const APP: () = {
-    static mut SERIAL_BUF: RingBuf = RingBuf::new();
-
     /// Initialiation happens here.
     ///
     /// The init function will run with interrupts disabled and has exclusive
@@ -42,18 +39,16 @@ const APP: () = {
         loop {}
     }
 
-    #[interrupt(resources = [SERIAL_BUF], spawn = [move_table])]
+    #[interrupt(spawn = [move_table])]
     fn USART1() {
         hprintln!("USART1 interrupt called").unwrap();
 
         let byte_read = 42u8; // TODO
 
-        resources.SERIAL_BUF.push(byte_read).unwrap();
-
         spawn.move_table(byte_read).unwrap();
     }
 
-    #[task]
+    #[task(capacity = 64)]
     fn move_table(command: u8) {
         hprintln!("move: {}", command).unwrap();
     }
