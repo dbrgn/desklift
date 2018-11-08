@@ -1,6 +1,7 @@
 [package]
 name = "ringthing"
 version = "0.1.0"
+edition = "2018"
 authors = ["Danilo Bargen <mail@dbrgn.ch>"]
 description = "A simple lock-free no-std ring buffer / circular buffer data structure that can read and write 1 byte at a time."
 categories = ["embedded", "no-std", "data-structures"]

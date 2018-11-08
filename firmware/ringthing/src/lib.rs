@@ -10,4 +10,4 @@
 mod index;
 mod ringbuf;
 
-pub use ringbuf::{RingBuf, RingBufError};
+pub use crate::ringbuf::{RingBuf, RingBufError};

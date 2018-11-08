@@ -1,4 +1,4 @@
-use ::index::Index;
+use crate::index::Index;
 
 
 const SIZE: usize = 64 + 1;
