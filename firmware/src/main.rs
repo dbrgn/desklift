@@ -9,7 +9,7 @@ use cortex_m_semihosting::hprintln;
 use nb::block;
 use rtfm::app;
 use stm32f103xx_hal::prelude::*;
-use stm32f103xx_hal::serial::{Serial, Tx, Rx};
+use stm32f103xx_hal::serial::{Serial, Event, Tx, Rx};
 
 #[app(device = stm32f103xx)]
 const APP: () = {
@@ -41,10 +41,9 @@ const APP: () = {
         let clocks = rcc.cfgr.freeze(&mut flash.acr);
 
         // Set up serial communication
-        // TODO: Enable interrupt on incoming data?
         let tx_pin = gpiob.pb6.into_alternate_push_pull(&mut gpiob.crl);
         let rx_pin = gpiob.pb7;
-        let serial = Serial::usart1(
+        let mut serial = Serial::usart1(
             device.USART1,
             (tx_pin, rx_pin),
             &mut afio.mapr,
@@ -52,6 +51,10 @@ const APP: () = {
             clocks,
             &mut rcc.apb2,
         );
+
+        // Enable USART1 RX interrupt
+        serial.listen(Event::Rxne);
+
         let (tx, rx) = serial.split();
         TX = tx;
         RX = rx;
