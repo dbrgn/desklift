@@ -2,10 +2,7 @@
 
 # Building
 
-Use nightly Rust:
-
-    rustup update nightly
-    rustup override add nightly
+Use Rust 1.31+.
 
 Add rust-std component:
 

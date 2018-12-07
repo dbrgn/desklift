@@ -1,4 +1,3 @@
-#![feature(custom_attribute)]
 #![deny(unsafe_code)]
 #![no_main]
 #![no_std]
@@ -7,7 +6,8 @@ extern crate panic_semihosting;
 
 use cortex_m_semihosting::hprintln;
 use nb::block;
-use rtfm::app;
+use rtfm::{app, pend};
+use stm32f103xx::Interrupt;
 use stm32f103xx_hal::prelude::*;
 use stm32f103xx_hal::serial::{Serial, Event, Tx, Rx};
 
@@ -66,6 +66,8 @@ const APP: () = {
     #[idle]
     fn idle() -> ! {
         hprintln!("idle").unwrap();
+        pend(Interrupt::USART1);
+        hprintln!("pend USART1 called").unwrap();
 
         // Busy-loop. In production, remove the `idle` function to fall back to
         // the default implementation which puts the device to sleep.
