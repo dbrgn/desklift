@@ -1,12 +1,12 @@
 # Desk Lift Firmware
 
-# Building
+# Building and Running
 
 Use Rust 1.31+.
 
 Add rust-std component:
 
-    rustup target add thumbv7em-none-eabihf
+    rustup target add thumbv7m-none-eabi
 
 Start OpenOCD:
 
@@ -14,7 +14,11 @@ Start OpenOCD:
 
 Build and run binary:
 
-    cargo run --release --target thumbv7em-none-eabihf
+    cargo run --release
+
+Connect via miniterm:
+
+    miniterm.py -e --raw /dev/ttyUSB0 9600
 
 # License
 
