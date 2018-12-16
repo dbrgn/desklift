@@ -1,6 +1,7 @@
 # Desk Lift Firmware
 
-# Building and Running
+
+# Debugging
 
 Use Rust 1.31+.
 
@@ -18,7 +19,23 @@ Build and run binary:
 
 Connect via miniterm:
 
-    miniterm.py -e --raw /dev/ttyUSB0 9600
+    miniterm.py -e --raw /dev/ttyUSB0 115200
+
+
+# Release Builds
+
+Like debugging, but without default features (this will exclude things like
+semihosting):
+
+    cargo build --release --no-default-features
+
+
+# Testing
+
+Run the test script:
+
+    ./test.sh
+
 
 # License
 

@@ -11,12 +11,13 @@
 #![no_main]
 #![cfg_attr(not(test), no_std)]
 
-// pick a panicking behavior
-// extern crate panic_halt; // you can put a breakpoint on `rust_begin_unwind` to catch panics
-// extern crate panic_abort; // requires nightly
-// extern crate panic_itm; // logs messages over ITM; requires ITM support
+// Panicking behavior
+#[cfg(not(feature = "debug"))]
+extern crate panic_halt; // you can put a breakpoint on `rust_begin_unwind` to catch panics
+#[cfg(feature = "debug")]
 extern crate panic_semihosting; // logs messages to the host stderr; requires a debugger
 
+#[cfg(feature = "debug")]
 use cortex_m_semihosting::hprintln;
 use nb::block;
 use rtfm::app;
@@ -39,6 +40,7 @@ const APP: () = {
     /// app attribute.
     #[init]
     fn init() {
+        #[cfg(feature = "debug")]
         hprintln!("init").unwrap();
 
         // Cortex-M peripherals
@@ -79,6 +81,7 @@ const APP: () = {
     /// runs forever.
     #[idle]
     fn idle() -> ! {
+        #[cfg(feature = "debug")]
         hprintln!("idle").unwrap();
 
         // Busy-loop. In production, remove the `idle` function to fall back to
@@ -88,7 +91,6 @@ const APP: () = {
 
     #[interrupt(resources = [RX], spawn = [move_table])]
     fn USART1() {
-        //hprintln!("USART1 interrupt called").unwrap();
         let byte_read: u8 = block!(resources.RX.read()).expect("Could not read byte");
         let command = Command::from_u8(byte_read);
         spawn.move_table(command).expect("Could not spawn move_table task");
@@ -96,6 +98,7 @@ const APP: () = {
 
     #[task(capacity = 64)]
     fn move_table(command: Command) {
+        #[cfg(feature = "debug")]
         hprintln!("Move: {}", command).unwrap();
     }
 

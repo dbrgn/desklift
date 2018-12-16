@@ -9,13 +9,18 @@ repository = "https://github.com/dbrgn/desklift"
 version = "0.1.0"
 edition = "2018"
 
+[features]
+default = ["debug"]
+debug = ["panic-semihosting", "cortex-m-semihosting"]
+
 [dependencies]
 cortex-m = "0.5"
 cortex-m-rt = "0.6"
 cortex-m-rtfm = "0.4.0-beta.3"
-cortex-m-semihosting = "0.3"
+cortex-m-semihosting = { version = "0.3", optional = true }
 nb = "0.1"
-panic-semihosting = "0.5"
+panic-semihosting = { version = "0.5", optional = true }
+panic-halt = "0.2"
 desklift_command = { path = "desklift_command" }
 
 # Uncomment for the panic example.
