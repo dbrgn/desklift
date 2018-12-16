@@ -9,7 +9,7 @@
 
 #![deny(unsafe_code)]
 #![no_main]
-#![no_std]
+#![cfg_attr(not(test), no_std)]
 
 // pick a panicking behavior
 // extern crate panic_halt; // you can put a breakpoint on `rust_begin_unwind` to catch panics
@@ -17,13 +17,13 @@
 // extern crate panic_itm; // logs messages over ITM; requires ITM support
 extern crate panic_semihosting; // logs messages to the host stderr; requires a debugger
 
-
 use cortex_m_semihosting::hprintln;
 use nb::block;
 use rtfm::app;
-use stm32f103xx::Interrupt;
 use stm32f103xx_hal::prelude::*;
 use stm32f103xx_hal::serial::{Serial, Event, Tx, Rx};
+
+use desklift_command::Command;
 
 #[app(device = stm32f103xx)]
 const APP: () = {
@@ -89,13 +89,14 @@ const APP: () = {
     #[interrupt(resources = [RX], spawn = [move_table])]
     fn USART1() {
         //hprintln!("USART1 interrupt called").unwrap();
-        let byte_read = block!(resources.RX.read()).expect("Could not read byte");
-        spawn.move_table(byte_read).expect("Could not spawn move_table task");
+        let byte_read: u8 = block!(resources.RX.read()).expect("Could not read byte");
+        let command = Command::from_u8(byte_read);
+        spawn.move_table(command).expect("Could not spawn move_table task");
     }
 
     #[task(capacity = 64)]
-    fn move_table(command: u8) {
-        //hprintln!("move: {}", command).unwrap();
+    fn move_table(command: Command) {
+        hprintln!("Move: {}", command).unwrap();
     }
 
     // RTFM requires that free interrupts are declared in an extern block when
