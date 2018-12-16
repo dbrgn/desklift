@@ -1,3 +1,12 @@
+//! Desk lift firmware
+//!
+//! Serial protocol:
+//!
+//! - Baudrate 115'200
+//! - Every command is a single signed byte
+//! - Positive values move up, negative values move down
+//! - The value must be multiplied by 0.1s to get the move duration
+
 #![deny(unsafe_code)]
 #![no_main]
 #![no_std]
@@ -52,7 +61,7 @@ const APP: () = {
             device.USART1,
             (tx_pin, rx_pin),
             &mut afio.mapr,
-            9600.bps(),
+            115_200.bps(),
             clocks,
             &mut rcc.apb2,
         );
