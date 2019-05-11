@@ -125,7 +125,7 @@
  )
 
  (netsegment 4375212d-89e8-4faf-a9a2-3cd1a8bbe12e
-  (net eb17617d-1f11-4a18-8a7c-069e5c8fcade)
+  (net 3eb0245e-bdde-49db-9086-f720d1cb5204)
   (via 1bb5af62-515b-466e-87a8-5700976b16a0
    (position 43.18 71.755) (size 1.6) (drill 0.8) (shape round)
   )
