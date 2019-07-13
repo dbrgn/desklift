@@ -118,6 +118,16 @@
    (auto_rotate true) (mirror false) (value "{{NAME}}")
   )
  )
+ (device 58a019fb-0f09-470c-be4a-0f97056549ae
+  (lib_device 7186a6b2-4042-451f-a698-288394ec67a7)
+  (lib_footprint c252dc13-17f4-48f2-b087-ba8a9d16f8f0)
+  (position 6.985088 -61.595776) (rotation 0.0) (mirror false)
+  (stroke_text 9d732277-1102-4fda-be5a-0c99233c8cda (layer top_cu)
+   (height 1.0) (stroke_width 0.2) (letter_spacing auto) (line_spacing 1.48)
+   (align left center) (position 9.085088 -61.595776) (rotation 0.0)
+   (auto_rotate false) (mirror false) (value "{{VALUE}}")
+  )
+ )
  (device 5e357268-0a72-4c6b-bde7-9c4004ef501c
   (lib_device 318107ec-c284-4f1f-9bca-c7ff9059c0c7)
   (lib_footprint 95b0c9d3-03ae-464f-9143-22fb263b038e)
@@ -620,8 +630,11 @@
   (connect_style solid)
   (vertex (position 0.0 0.0) (angle 0.0))
   (vertex (position 50.0 0.0) (angle 0.0))
-  (vertex (position 50.0 -65.0) (angle 0.0))
-  (vertex (position 0.0 -65.0) (angle 0.0))
+  (vertex (position 50.0 -59.0) (angle 0.0))
+  (vertex (position 44.0 -65.0) (angle 0.0))
+  (vertex (position 23.0 -65.0) (angle 0.0))
+  (vertex (position 16.0 -58.0) (angle 0.0))
+  (vertex (position 0.0 -58.0) (angle 0.0))
  )
 
  (polygon 2909356e-a40a-4101-9b67-844d52019f44 (layer brd_outlines)
@@ -635,12 +648,12 @@
  )
 
  (stroke_text c5dd3410-e70e-411f-abf9-019f6a56919e (layer top_cu)
-  (height 2.5) (stroke_width 0.6) (letter_spacing auto) (line_spacing auto)
-  (align left bottom) (position 8.890112 -62.230784) (rotation 0.0)
+  (height 1.5) (stroke_width 0.3) (letter_spacing auto) (line_spacing auto)
+  (align center center) (position 47.943104 -63.183296) (rotation 45.0)
   (auto_rotate true) (mirror false) (value "{{VERSION}}")
  )
 
  (hole 1ac7ce2f-a9fb-495f-873e-27fe2d950dc5 (diameter 3.0) (position 40.005504 -23.495296))
- (hole deca1e57-bb20-4caf-85ba-cb37cd175c13 (diameter 3.0) (position 3.810048 -60.960768))
+ (hole deca1e57-bb20-4caf-85ba-cb37cd175c13 (diameter 3.0) (position 2.857536 -62.230784))
 
 )
