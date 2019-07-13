@@ -1,5 +1,5 @@
 (librepcb_symbol 7bcc74b5-a02a-4a67-bf14-3b18d76cbd09
- (name "Coil")
+ (name "Relay Coil / Solenoid")
  (description "A coil (e.g. as used in a relay).")
  (keywords "coil,solenoid")
  (author "Danilo Bargen")
