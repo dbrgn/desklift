@@ -1,0 +1,24 @@
+G04 --- HEADER BEGIN --- *
+%TF.GenerationSoftware,LibrePCB,LibrePCB,0.1.1-unstable*%
+%TF.CreationDate,2019-07-14T01:55:39*%
+%TF.ProjectId,desklift - other_routing,146e283d-8dba-42bd-9080-c603e88aa634,v3*%
+%TF.Part,Single*%
+%FSLAX66Y66*%
+%MOMM*%
+G01*
+G74*
+G04 --- HEADER END --- *
+G04 --- APERTURE LIST BEGIN --- *
+%ADD10C,0.001*%
+G04 --- APERTURE LIST END --- *
+G04 --- BOARD BEGIN --- *
+D10*
+X0Y0D02*
+X0Y0D01*
+X50000000Y0D01*
+X50000000Y-65000000D01*
+X0Y-65000000D01*
+X0Y0D01*
+G04 --- BOARD END --- *
+%TF.MD5,1221a4b7fcaaa80536006d9858e4e8b0*%
+M02*
