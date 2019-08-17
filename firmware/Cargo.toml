@@ -29,13 +29,13 @@ desklift_command = { path = "desklift_command" }
 # Uncomment for the allocator example.
 # alloc-cortex-m = "0.3.4"
 
-[dependencies.stm32f103xx]
-features = ["rt"]
-version = "0.11.0"
+[dependencies.stm32f1]
+features = ["stm32f103", "rt"]
+version = "0.8.0"
 
-[dependencies.stm32f103xx-hal]
-git = "https://github.com/japaric/stm32f103xx-hal"
-features = ["rt"]
+[dependencies.stm32f1xx-hal]
+features = ["stm32f103", "rt"]
+version = "0.4.0"
 
 [profile.release]
 codegen-units = 1 # better optimizations

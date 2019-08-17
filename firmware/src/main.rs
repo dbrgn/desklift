@@ -21,16 +21,17 @@ extern crate panic_semihosting; // logs messages to the host stderr; requires a 
 use cortex_m_semihosting::hprintln;
 use nb::block;
 use rtfm::app;
-use stm32f103xx_hal::prelude::*;
-use stm32f103xx_hal::serial::{Serial, Event, Tx, Rx};
+use stm32f1xx_hal::pac;
+use stm32f1xx_hal::prelude::*;
+use stm32f1xx_hal::serial::{self, Serial, Event, Tx, Rx, Parity, StopBits};
 
 use desklift_command::Command;
 
-#[app(device = stm32f103xx)]
+#[app(device = stm32f1::stm32f103)]
 const APP: () = {
     /// Serial peripheral
-    static mut TX: Tx<stm32f103xx::USART1> = ();
-    static mut RX: Rx<stm32f103xx::USART1> = ();
+    static mut TX: Tx<pac::USART1> = ();
+    static mut RX: Rx<pac::USART1> = ();
 
     /// Initialiation happens here.
     ///
@@ -47,7 +48,7 @@ const APP: () = {
         let _core: rtfm::Peripherals = core;
 
         // Device specific peripherals
-        let device: stm32f103xx::Peripherals = device;
+        let device: pac::Peripherals = device;
 
         // Get reference to peripherals required for USART
         let mut rcc = device.RCC.constrain();
@@ -63,7 +64,11 @@ const APP: () = {
             device.USART1,
             (tx_pin, rx_pin),
             &mut afio.mapr,
-            115_200.bps(),
+            serial::Config {
+                baudrate: 115_200.bps(),
+                parity: Parity::ParityNone,
+                stopbits: StopBits::STOP1,
+            },
             clocks,
             &mut rcc.apb2,
         );
