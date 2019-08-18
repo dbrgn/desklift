@@ -14,7 +14,7 @@ default = ["debug"]
 debug = ["panic-semihosting", "cortex-m-semihosting"]
 
 [dependencies]
-cortex-m = "0.5"
+cortex-m = "0.6"
 cortex-m-rt = "0.6"
 cortex-m-rtfm = "0.4.0-beta.3"
 cortex-m-semihosting = { version = "0.3", optional = true }
