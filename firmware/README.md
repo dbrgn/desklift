@@ -21,6 +21,12 @@ Connect via miniterm:
 
     miniterm.py -e --raw /dev/ttyUSB0 115200
 
+Alternatively connect through Python:
+
+    >>> import serial
+    >>> s = serial.Serial('/dev/ttyUSB0', baudrate=115200)
+    >>> s.write(b'\x3f')
+
 
 # Release Builds
 
