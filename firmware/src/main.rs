@@ -5,7 +5,7 @@
 //! - Baudrate 115'200
 //! - Every command is a single signed byte
 //! - Positive values move up, negative values move down
-//! - The value must be multiplied by 100 ms to get the move duration
+//! - The value must be multiplied by 10 ms to get the move duration
 //!
 //! Physical wiring:
 //!
@@ -30,7 +30,7 @@ use nb::block;
 use rtfm::app;
 use stm32f1xx_hal::{prelude::*, pac};
 use stm32f1xx_hal::delay::{Delay};
-use stm32f1xx_hal::gpio::{Alternate, PushPull, gpiob};
+use stm32f1xx_hal::gpio::{Output, PushPull, OpenDrain, State, gpiob, gpioc};
 use stm32f1xx_hal::serial::{self, Serial, Event, Tx, Rx, Parity, StopBits};
 
 use desklift_command::{Command, Direction};
@@ -42,8 +42,11 @@ const APP: () = {
     static mut RX: Rx<pac::USART1> = ();
 
     // GPIO pins
-    static mut GPIO_UP: gpiob::PB4<Alternate<PushPull>> = ();
-    static mut GPIO_DOWN: gpiob::PB5<Alternate<PushPull>> = ();
+    static mut GPIO_UP: gpiob::PB4<Output<PushPull>> = ();
+    static mut GPIO_DOWN: gpiob::PB5<Output<PushPull>> = ();
+
+    // LED pins
+    static mut LED: gpioc::PC13<Output<OpenDrain>> = ();
 
     // Delay peripheral
     static mut DELAY: Delay = ();
@@ -70,6 +73,7 @@ const APP: () = {
         let mut afio = device.AFIO.constrain(&mut rcc.apb2);
         let gpioa = device.GPIOA.split(&mut rcc.apb2);
         let mut gpiob = device.GPIOB.split(&mut rcc.apb2);
+        let mut gpioc = device.GPIOC.split(&mut rcc.apb2);
         let mut flash = device.FLASH.constrain();
         let clocks = rcc.cfgr.freeze(&mut flash.acr);
 
@@ -99,34 +103,45 @@ const APP: () = {
         let (tx, rx) = serial.split();
 
         // Set up GPIO outputs
-        let mut gpio_up = pb4.into_alternate_push_pull(&mut gpiob.crl);
-        let mut gpio_down = gpiob.pb5.into_alternate_push_pull(&mut gpiob.crl);
+        let mut gpio_up = pb4.into_push_pull_output(&mut gpiob.crl);
+        let mut gpio_down = gpiob.pb5.into_push_pull_output(&mut gpiob.crl);
         gpio_up.set_low().unwrap();
         gpio_down.set_low().unwrap();
 
         // Set up delay provider
-        let delay = Delay::new(core.SYST, clocks);
+        let mut delay = Delay::new(core.SYST, clocks);
+
+        // Set up status LED and blink twice
+        let mut led = gpioc.pc13.into_open_drain_output_with_state(&mut gpioc.crh, State::High);
+        led.set_low().unwrap();
+        delay.delay_ms(200u16);
+        led.set_high().unwrap();
+        delay.delay_ms(200u16);
+        led.set_low().unwrap();
+        delay.delay_ms(200u16);
+        led.set_high().unwrap();
 
         // Assign resources
         TX = tx;
         RX = rx;
         GPIO_UP = gpio_up;
         GPIO_DOWN = gpio_down;
+        LED = led;
         DELAY = delay;
     }
 
-    /// The runtime will execute the idle task after init. Unlike init, idle
-    /// will run with interrupts enabled and it's not allowed to return so it
-    /// runs forever.
-    #[idle]
-    fn idle() -> ! {
-        #[cfg(feature = "debug")]
-        hprintln!("idle").unwrap();
-
-        // Busy-loop. In production, remove the `idle` function to fall back to
-        // the default implementation which puts the device to sleep.
-        loop {}
-    }
+    // /// The runtime will execute the idle task after init. Unlike init, idle
+    // /// will run with interrupts enabled and it's not allowed to return so it
+    // /// runs forever.
+    // #[idle]
+    // fn idle() -> ! {
+    //     #[cfg(feature = "debug")]
+    //     hprintln!("idle").unwrap();
+    //
+    //     // Busy-loop. In production, remove the `idle` function to fall back to
+    //     // the default implementation which puts the device to sleep.
+    //     loop {}
+    // }
 
     #[interrupt(resources = [RX], spawn = [move_table])]
     fn USART1() {
@@ -135,7 +150,7 @@ const APP: () = {
         spawn.move_table(command).expect("Could not spawn move_table task");
     }
 
-    #[task(capacity = 64, resources = [GPIO_UP, GPIO_DOWN, DELAY])]
+    #[task(capacity = 64, resources = [GPIO_UP, GPIO_DOWN, DELAY, LED])]
     fn move_table(command: Command) {
         #[cfg(feature = "debug")]
         hprintln!("Move: {}", command).unwrap();
@@ -143,9 +158,11 @@ const APP: () = {
             Direction::Up => resources.GPIO_UP.set_high().unwrap(),
             Direction::Down => resources.GPIO_DOWN.set_high().unwrap(),
         };
+        resources.LED.set_low().unwrap();
         resources.DELAY.delay_ms(command.get_ms());
         resources.GPIO_UP.set_low().unwrap();
         resources.GPIO_DOWN.set_low().unwrap();
+        resources.LED.set_high().unwrap();
     }
 
     // RTFM requires that free interrupts are declared in an extern block when
