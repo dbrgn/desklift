@@ -45,6 +45,8 @@ const ERRNO_GPIO_UPDN: u8 = 1;
 const ERRNO_GPIO_LED: u8 = 2;
 const ERRNO_GPIO_DEBUG: u8 = 3;
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 #[app(device = stm32f1::stm32f103)]
 const APP: () = {
     // GPIO pins
@@ -116,7 +118,7 @@ const APP: () = {
         let usb_dev = UsbDeviceBuilder::new(USB_BUS.as_ref().unwrap(), UsbVidPid(0x16c0, 0x27dd))
             .manufacturer("dbrgn")
             .product("Desklift v3")
-            .serial_number("1")
+            .serial_number(VERSION)
             .device_class(USB_CLASS_CDC)
             .build();
 
