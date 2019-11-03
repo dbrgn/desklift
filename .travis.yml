@@ -1,0 +1,15 @@
+language: bash
+    
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+
+install:
+  - wget https://download.librepcb.org/nightly_builds/add-cli/librepcb-cli-nightly-linux-x86_64.AppImage
+  - chmod a+x ./librepcb-cli-nightly-linux-x86_64.AppImage
+  - ./librepcb-cli-nightly-linux-x86_64.AppImage --appimage-extract
+  - ln -s ./squashfs-root/AppRun ./librepcb-cli
+
+script:
+  - xvfb-run -a ./librepcb-cli open-project --erc desklift.lpp
