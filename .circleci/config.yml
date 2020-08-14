@@ -1,0 +1,26 @@
+version: 2
+
+jobs:
+  erc:
+    docker:
+      - image: debian:9
+    steps:
+      - checkout
+      - run:
+          name: Download librepcb-cli
+          command: wget https://download.librepcb.org/nightly_builds/add-cli/librepcb-cli-nightly-linux-x86_64.AppImage
+      - run:
+          name: Extract librepcb-cli
+          command: |
+            chmod a+x ./librepcb-cli-nightly-linux-x86_64.AppImage &&
+            ./librepcb-cli-nightly-linux-x86_64.AppImage --appimage-extract &&
+            ln -s ./squashfs-root/AppRun ./librepcb-cli
+      - run:
+          name: Run ERC
+          command: xvfb-run -a ./librepcb-cli open-project --erc desklift
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - erc
